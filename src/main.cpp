@@ -266,17 +266,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             return 0;
 
         case WM_TRAYICON:
-            if (lParam == WM_RBUTTONUP) {
-                // Show context menu
-                POINT pt;
-                GetCursorPos(&pt);
-                if (g_app) {
+            if (g_app) {
+                // Forward all tray icon messages to SettingsManager
+                g_app->settings_manager.OnTrayIconClick(lParam);
+
+                // Handle right-click to show context menu
+                if (lParam == WM_RBUTTONUP) {
+                    POINT pt;
+                    GetCursorPos(&pt);
                     g_app->settings_manager.ShowContextMenu(hwnd, pt);
-                }
-            } else if (lParam == WM_LBUTTONDBLCLK) {
-                // Toggle enabled state
-                if (g_app) {
-                    g_app->settings_manager.ToggleEnabled();
                 }
             }
             return 0;
