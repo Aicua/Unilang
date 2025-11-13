@@ -81,6 +81,11 @@ private:
      */
     std::string GetCategoryForShortcut(const std::string& shortcut) const;
 
+    /**
+     * @brief Get description/full name for a shortcut (e.g., "\al" → "alpha")
+     */
+    std::string GetDescriptionForShortcut(const std::string& shortcut) const;
+
 private:
     HWND m_hwnd = nullptr;
     HWND m_search_edit = nullptr;

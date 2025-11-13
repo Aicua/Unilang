@@ -193,6 +193,123 @@ std::string HelpWindow::GetCategoryForShortcut(const std::string& shortcut) cons
     return "Other";
 }
 
+std::string HelpWindow::GetDescriptionForShortcut(const std::string& shortcut) const {
+    // Map shortcuts to their full names for better searchability
+    if (shortcut.find("\\") == 0) {
+        std::string key = shortcut.substr(1);
+
+        // Greek letters (lowercase) - full names
+        if (key == "al") return "alpha";
+        if (key == "be") return "beta";
+        if (key == "ga") return "gamma";
+        if (key == "de") return "delta";
+        if (key == "ep") return "epsilon";
+        if (key == "ze") return "zeta";
+        if (key == "eta") return "eta";
+        if (key == "the") return "theta";
+        if (key == "io") return "iota";
+        if (key == "ka") return "kappa";
+        if (key == "la") return "lambda";
+        if (key == "mu") return "mu";
+        if (key == "nu") return "nu";
+        if (key == "xi") return "xi";
+        if (key == "pi") return "pi";
+        if (key == "rho") return "rho";
+        if (key == "si") return "sigma";
+        if (key == "tau") return "tau";
+        if (key == "up") return "upsilon";
+        if (key == "phi") return "phi";
+        if (key == "chi") return "chi";
+        if (key == "psi") return "psi";
+        if (key == "om") return "omega";
+
+        // Greek letters (uppercase)
+        if (key == "Ga") return "Gamma";
+        if (key == "De") return "Delta";
+        if (key == "The") return "Theta";
+        if (key == "La") return "Lambda";
+        if (key == "Xi") return "Xi";
+        if (key == "Pi") return "Pi";
+        if (key == "Si") return "Sigma";
+        if (key == "Phi") return "Phi";
+        if (key == "Psi") return "Psi";
+        if (key == "Om") return "Omega";
+
+        // Math operators
+        if (key == "par") return "partial derivative";
+        if (key == "nab") return "nabla / del";
+        if (key == "int") return "integral";
+        if (key == "iint") return "double integral";
+        if (key == "iiint") return "triple integral";
+        if (key == "oint") return "contour integral";
+        if (key == "sum") return "summation";
+        if (key == "prod") return "product";
+        if (key == "sqr") return "square root";
+        if (key == "inf") return "infinity";
+        if (key == "pm") return "plus-minus";
+        if (key == "mp") return "minus-plus";
+        if (key == "tim") return "times / multiply";
+        if (key == "div") return "divide";
+        if (key == "cdot") return "center dot";
+        if (key == "bul") return "bullet";
+
+        // Comparison
+        if (key == "app") return "approximately equal";
+        if (key == "neq") return "not equal";
+        if (key == "leq") return "less than or equal";
+        if (key == "geq") return "greater than or equal";
+        if (key == "ll") return "much less than";
+        if (key == "gg") return "much greater than";
+        if (key == "equi") return "equivalent";
+        if (key == "sim") return "similar";
+        if (key == "prop") return "proportional";
+
+        // Arrows
+        if (key == "rarrow") return "right arrow";
+        if (key == "larrow") return "left arrow";
+        if (key == "uarrow") return "up arrow";
+        if (key == "darrow") return "down arrow";
+        if (key == "lrarrow") return "left-right arrow";
+        if (key == "Rarrow") return "right double arrow / implies";
+        if (key == "Larrow") return "left double arrow";
+        if (key == "Lrarrow") return "left-right double arrow / iff";
+
+        // Sets & Logic
+        if (key == "in") return "element of / in";
+        if (key == "notin") return "not element of";
+        if (key == "subset") return "subset";
+        if (key == "supset") return "superset";
+        if (key == "subseteq") return "subset or equal";
+        if (key == "supseteq") return "superset or equal";
+        if (key == "cup") return "union";
+        if (key == "cap") return "intersection";
+        if (key == "emptyset") return "empty set";
+        if (key == "forall") return "for all";
+        if (key == "exists") return "exists / there exists";
+        if (key == "neg") return "not / negation";
+        if (key == "land") return "and / logical and";
+        if (key == "lor") return "or / logical or";
+
+        // Fractions
+        if (key == "half") return "one half";
+        if (key == "third") return "one third";
+        if (key == "quarter") return "one quarter";
+        if (key == "twothirds") return "two thirds";
+        if (key == "threequarters") return "three quarters";
+
+        // Misc
+        if (key == "deg" || key == "do") return "degree";
+        if (key == "micro") return "micro";
+        if (key == "angstrom") return "angstrom";
+        if (key == "ohm") return "ohm";
+        if (key == "euro") return "euro";
+        if (key == "pound") return "pound";
+        if (key == "yen") return "yen";
+    }
+
+    return "";
+}
+
 void HelpWindow::PopulateListView(const std::string& filter) {
     // Clear existing items
     ListView_DeleteAllItems(m_listview);
@@ -208,16 +325,22 @@ void HelpWindow::PopulateListView(const std::string& filter) {
 
     int item_index = 0;
     for (const auto& [shortcut, replacement] : shortcuts) {
+        // Get description
+        std::string description = GetDescriptionForShortcut(shortcut);
+
         // Filter logic
         if (!filter_lower.empty()) {
             std::string shortcut_lower = shortcut;
             std::string replacement_lower = replacement;
+            std::string description_lower = description;
             std::transform(shortcut_lower.begin(), shortcut_lower.end(), shortcut_lower.begin(), ::tolower);
             std::transform(replacement_lower.begin(), replacement_lower.end(), replacement_lower.begin(), ::tolower);
+            std::transform(description_lower.begin(), description_lower.end(), description_lower.begin(), ::tolower);
 
-            // Check if filter matches shortcut or replacement
+            // Check if filter matches shortcut, replacement, or description
             if (shortcut_lower.find(filter_lower) == std::string::npos &&
-                replacement_lower.find(filter_lower) == std::string::npos) {
+                replacement_lower.find(filter_lower) == std::string::npos &&
+                description_lower.find(filter_lower) == std::string::npos) {
                 continue;
             }
         }
@@ -229,6 +352,7 @@ void HelpWindow::PopulateListView(const std::string& filter) {
         std::wstring category_w(category.begin(), category.end());
         std::wstring shortcut_w(shortcut.begin(), shortcut.end());
         std::wstring replacement_w(replacement.begin(), replacement.end());
+        std::wstring description_w(description.begin(), description.end());
 
         // Insert item
         LVITEMW item = {};
@@ -250,9 +374,9 @@ void HelpWindow::PopulateListView(const std::string& filter) {
         item.pszText = (LPWSTR)replacement_w.c_str();
         ListView_SetItem(m_listview, &item);
 
-        // Description (empty for now)
+        // Description
         item.iSubItem = 3;
-        item.pszText = (LPWSTR)L"";
+        item.pszText = (LPWSTR)description_w.c_str();
         ListView_SetItem(m_listview, &item);
 
         item_index++;
