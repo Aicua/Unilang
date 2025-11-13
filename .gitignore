@@ -13,7 +13,6 @@
 *.dSYM/
 
 # Executables
-*/**/*
 
 # IDE and Editor directories and files
 .vscode/
