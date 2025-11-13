@@ -35,6 +35,20 @@ std::string GetExecutableDir();
 bool IsVSCodeWindow();
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
+    // Check for single instance (prevent multiple instances running)
+    HANDLE hMutex = CreateMutexW(nullptr, TRUE, L"UniLang_SingleInstance_Mutex");
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        // Another instance is already running
+        MessageBoxW(nullptr,
+                   L"UniLang is already running!\n\nCheck the system tray for the UniLang icon.",
+                   L"UniLang - Already Running",
+                   MB_OK | MB_ICONINFORMATION);
+        if (hMutex) {
+            CloseHandle(hMutex);
+        }
+        return 0;
+    }
+
     // Note: Console logging is disabled for release build
     // To enable debug console, uncomment the following lines:
     /*
