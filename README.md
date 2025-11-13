@@ -1,31 +1,80 @@
 # UniLang - Universal Language & Text Replacement Tool
 
 ## Overview
-UniLang is a powerful, versatile tool designed to facilitate seamless text replacement across multiple languages. It aims to simplify the translation and localization process, making it easier for developers, content creators, and individuals to ensure their content resonates with global audiences.
+UniLang is a powerful Windows application that provides LaTeX-style shortcuts for typing mathematical symbols, Greek letters, and special characters. Type `\alpha` and get `α`, type `\sum` and get `∑` - it's that simple!
 
 ## Features
-- **Multi-language Support**: Effortlessly handle text in various languages.
-- **Customizable Templates**: Utilize templates to streamline repetitive text translation tasks.
-- **User-Friendly Interface**: Enjoy a clean and intuitive interface for easy navigation and usability.
-- **Integration Capabilities**: Easily integrate with your existing workflows and applications.
-- **Real-time Preview**: View changes as they happen, ensuring accurate translations.
+- ⌨️ **LaTeX-style Shortcuts**: Type `\pi` → `π`, `\sum` → `∑`, `\alpha` → `α`
+- 🔄 **Real-time Text Replacement**: Automatic text replacement as you type
+- 🪟 **System-wide Integration**: Works in any Windows application
+- 💬 **Smart Popup Suggestions**: Visual feedback for available shortcuts
+- ⚙️ **Customizable**: Add your own shortcuts via JSON configuration
+- 🎯 **Pattern Matching**: Intelligent detection and replacement
 
-## Installation
-To install UniLang, simply clone the repository and run the installation script. For detailed instructions, refer to the [Installation Guide](link-to-guide.md).
+## Requirements
+- **OS**: Windows 10 or later
+- **Build Tools**: Visual Studio 2019/2022 or CMake + MinGW
+- **CMake**: Version 3.16 or higher
+
+## Building from Source
+
+### Using CMake (Recommended)
 
 ```bash
+# Clone the repository
 git clone https://github.com/Aicua/Unilang.git
 cd Unilang
-./install.sh
+
+# Create build directory
+mkdir build
+cd build
+
+# Generate build files
+cmake .. -G "Visual Studio 17 2022" -A x64
+
+# Build the project
+cmake --build . --config Release
+
+# The executable will be in build/bin/UniLang.exe
 ```
+
+### Using Visual Studio
+
+1. Open CMake project in Visual Studio 2022
+2. Select `x64-Release` configuration
+3. Build → Build All
+4. Find executable in `out/build/x64-Release/bin/UniLang.exe`
 
 ## Usage
-Once installed, you can start using UniLang by running the command:
 
-```bash
-unilang --help
+1. **Run the Application**: Double-click `UniLang.exe` (runs in system tray)
+2. **Type Shortcuts**: In any application, type a LaTeX command like `\alpha`
+3. **Get Results**: The shortcut is automatically replaced with `α`
+
+### Example Shortcuts
+
+| Type | Get | Type | Get |
+|------|-----|------|-----|
+| `\alpha` | α | `\beta` | β |
+| `\sum` | ∑ | `\int` | ∫ |
+| `\infty` | ∞ | `\pm` | ± |
+| `\neq` | ≠ | `\leq` | ≤ |
+
+See `config/shortcuts.json` for the complete list of 200+ shortcuts.
+
+## Configuration
+
+Edit `config/shortcuts.json` to add your own shortcuts:
+
+```json
+{
+  "shortcuts": {
+    "custom": {
+      "\\myshortcut": "my replacement text"
+    }
+  }
+}
 ```
-This command displays all available operations and how to use them.
 
 ## Contributing
 We welcome contributions from the community! If you'd like to contribute to UniLang, please check out our [Contributing Guidelines](link-to-contributing-guidelines.md) for more information.

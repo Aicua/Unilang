@@ -1,0 +1,80 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ main, develop, 'claude/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        config: [Release, Debug]
+        arch: [x64]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
+
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config ${{ matrix.config }} --parallel
+
+    - name: Check executable
+      run: |
+        if (Test-Path "build/bin/${{ matrix.config }}/UniLang.exe") {
+          Write-Host "✅ UniLang.exe built successfully!"
+          Get-Item "build/bin/${{ matrix.config }}/UniLang.exe" | Format-List
+        } else {
+          Write-Error "❌ UniLang.exe not found!"
+          exit 1
+        }
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: UniLang-${{ matrix.config }}-${{ matrix.arch }}
+        path: build/bin/${{ matrix.config }}/UniLang.exe
+        if-no-files-found: error
+
+    - name: Upload config
+      if: matrix.config == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: UniLang-Config
+        path: config/shortcuts.json
+
+  # Create release on tag push
+  release:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          UniLang-Release-x64/UniLang.exe
+          UniLang-Config/shortcuts.json
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
