@@ -1,10 +1,10 @@
 # UniLang - Universal Language & Text Replacement Tool
 
 ## Overview
-UniLang is a powerful Windows application that provides LaTeX-style shortcuts for typing mathematical symbols, Greek letters, and special characters. Type `\alpha` and get `α`, type `\sum` and get `∑` - it's that simple!
+UniLang is a powerful Windows application that provides LaTeX-style shortcuts for typing mathematical symbols, Greek letters, and special characters. Type `\al` and get `α`, type `\sum` and get `∑` - it's that simple!
 
 ## Features
-- ⌨️ **LaTeX-style Shortcuts**: Type `\pi` → `π`, `\sum` → `∑`, `\alpha` → `α`
+- ⌨️ **LaTeX-style Shortcuts**: Type `\pi` → `π`, `\sum` → `∑`, `\al` → `α`
 - 🔄 **Real-time Text Replacement**: Automatic text replacement as you type
 - 🪟 **System-wide Integration**: Works in any Windows application
 - 💬 **Smart Popup Suggestions**: Visual feedback for available shortcuts
@@ -48,19 +48,45 @@ cmake --build . --config Release
 ## Usage
 
 1. **Run the Application**: Double-click `UniLang.exe` (runs in system tray)
-2. **Type Shortcuts**: In any application, type a LaTeX command like `\alpha`
-3. **Get Results**: The shortcut is automatically replaced with `α`
+2. **Type Shortcuts**: In any application, type a shortcut like `\al` or `\sum`
+3. **Get Results**: The shortcut is automatically replaced with `α` or `∑`
 
 ### Example Shortcuts
 
+**Greek Letters:**
 | Type | Get | Type | Get |
 |------|-----|------|-----|
-| `\alpha` | α | `\beta` | β |
-| `\sum` | ∑ | `\int` | ∫ |
-| `\infty` | ∞ | `\pm` | ± |
-| `\neq` | ≠ | `\leq` | ≤ |
+| `\al` | α | `\be` | β |
+| `\ga` | γ | `\de` | δ |
+| `\pi` | π | `\om` | ω |
 
-See `config/shortcuts.json` for the complete list of 200+ shortcuts.
+**Math Operators:**
+| Type | Get | Type | Get |
+|------|-----|------|-----|
+| `\sum` | ∑ | `\int` | ∫ |
+| `\inf` | ∞ | `\pm` | ± |
+| `\sqr` | √ | `\par` | ∂ |
+
+**Comparison & Logic:**
+| Type | Get | Type | Get |
+|------|-----|------|-----|
+| `\neq` | ≠ | `\leq` | ≤ |
+| `\geq` | ≥ | `\app` | ≈ |
+| `\in` | ∈ | `\forall` | ∀ |
+
+**Arrows:**
+| Type | Get | Type | Get |
+|------|-----|------|-----|
+| `\rarrow` | → | `\Rarrow` | ⇒ |
+| `\lrarrow` | ↔ | `\Lrarrow` | ⇔ |
+
+**Superscript & Subscript:**
+| Type | Get | Type | Get |
+|------|-----|------|-----|
+| `^2` | ² | `^3` | ³ |
+| `_1` | ₁ | `_n` | ₙ |
+
+See `config/shortcuts.json` for the complete list of 200+ shortcuts across 9 categories.
 
 ## Configuration
 
