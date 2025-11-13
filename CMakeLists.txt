@@ -18,14 +18,19 @@ if(MSVC)
     add_compile_options(/MT$<$<CONFIG:Debug>:d>)
 endif()
 
-# Add nlohmann/json library from parent project
+# Fetch nlohmann/json library from GitHub
+include(FetchContent)
+FetchContent_Declare(
+    json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
-add_subdirectory(../libs/json ${CMAKE_BINARY_DIR}/json)
+FetchContent_MakeAvailable(json)
 
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libs/json/single_include
 )
 
 # Source files
