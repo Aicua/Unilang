@@ -42,6 +42,7 @@ set(UNILANG_SOURCES
     src/pattern_matcher.cpp
     src/popup_window.cpp
     src/settings_manager.cpp
+    src/help_window.cpp
 )
 
 # Header files
@@ -52,6 +53,7 @@ set(UNILANG_HEADERS
     src/pattern_matcher.h
     src/popup_window.h
     src/settings_manager.h
+    src/help_window.h
     src/resource.h
 )
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <functional>
 #include <Windows.h>
 
 namespace UniLang {
@@ -22,6 +23,8 @@ public:
         std::string trigger_key = "\\";
         bool case_sensitive = true;
     };
+
+    using OnHelpRequestCallback = std::function<void()>;
 
     SettingsManager();
     ~SettingsManager();
@@ -68,6 +71,13 @@ public:
      */
     void OnTrayIconClick(UINT msg);
 
+    /**
+     * @brief Set callback for Help Window request
+     */
+    void SetOnHelpRequestCallback(OnHelpRequestCallback callback) {
+        m_on_help_request = callback;
+    }
+
 private:
     /**
      * @brief Update tray icon tooltip
@@ -78,6 +88,7 @@ private:
     Settings m_settings;
     NOTIFYICONDATA m_nid = {};
     bool m_tray_initialized = false;
+    OnHelpRequestCallback m_on_help_request;
 
     // Menu item IDs
     static const UINT ID_TRAY_ENABLE = 1001;

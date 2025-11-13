@@ -10,6 +10,7 @@
 #include "text_replacer.h"
 #include "popup_window.h"
 #include "settings_manager.h"
+#include "help_window.h"
 
 namespace fs = std::filesystem;
 
@@ -21,6 +22,7 @@ struct AppState {
     UniLang::TextReplacer text_replacer;
     UniLang::PopupWindow popup_window;
     UniLang::SettingsManager settings_manager;
+    UniLang::HelpWindow help_window;
 
     HWND main_window = nullptr;
     bool running = true;
@@ -117,6 +119,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         MessageBoxA(nullptr, "Failed to create popup window!", "UniLang - Warning", MB_OK | MB_ICONWARNING);
         // Continue anyway - popup is optional
     }
+
+    // Create help window
+    if (!app.help_window.Create(hInstance, &app.shortcuts_dict)) {
+        MessageBoxA(nullptr, "Failed to create help window!", "UniLang - Warning", MB_OK | MB_ICONWARNING);
+        // Continue anyway - help is optional
+    }
+
+    // Set callback for tray icon left-click to show help window
+    app.settings_manager.SetOnHelpRequestCallback([&app]() {
+        app.help_window.Toggle();
+    });
 
     // Install keyboard hook
     if (!app.keyboard_hook.Install(OnKeyEvent)) {

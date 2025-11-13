@@ -162,7 +162,13 @@ void SettingsManager::ShowContextMenu(HWND hwnd, POINT pt) {
 }
 
 void SettingsManager::OnTrayIconClick(UINT msg) {
-    if (msg == WM_LBUTTONDBLCLK) {
+    if (msg == WM_LBUTTONUP) {
+        // Left-click: show help window
+        if (m_on_help_request) {
+            m_on_help_request();
+        }
+    }
+    else if (msg == WM_LBUTTONDBLCLK) {
         // Double-click: toggle enabled state
         ToggleEnabled();
     }
