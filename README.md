@@ -3,9 +3,17 @@
 ## Overview
 UniLang is a powerful Windows application that provides LaTeX-style shortcuts for typing mathematical symbols, Greek letters, and special characters. Type `\al` and get `α`, type `\sum` and get `∑` - it's that simple!
 
+## 📥 Download
+
+**Latest Release:** [Download UniLang.exe](https://github.com/Aicua/Unilang/releases/latest)
+
+Click the link above to always download the latest version. The app also supports automatic updates - just right-click the system tray icon and select "Check for Updates..."
+
 ## Features
 - ⌨️ **LaTeX-style Shortcuts**: Type `\pi` → `π`, `\sum` → `∑`, `\al` → `α`
-- 🔄 **Real-time Text Replacement**: Automatic text replacement as you type
+- 🔗 **URL Shortcuts**: Type `\rose` → Opens https://aicua.com/rose in browser
+- 🔄 **Auto-Update**: Check for updates directly from the app
+- 🔍 **Smart Search**: Search all shortcuts in the help window
 - 🪟 **System-wide Integration**: Works in any Windows application
 - 💬 **Smart Popup Suggestions**: Visual feedback for available shortcuts
 - ⚙️ **Customizable**: Add your own shortcuts via JSON configuration
@@ -51,6 +59,15 @@ cmake --build . --config Release
 2. **Type Shortcuts**: In any application, type a shortcut like `\al` or `\sum`
 3. **Get Results**: The shortcut is automatically replaced with `α` or `∑`
 
+### System Tray Features
+
+**Left Click:** Open search window to find shortcuts
+**Right Click:** Context menu with options:
+- ✅ **Enabled/Disabled**: Toggle UniLang on/off
+- 🔄 **Check for Updates**: Automatically download and install latest version
+- ⚙️ **Settings**: Configure application (coming soon)
+- ❌ **Exit**: Close UniLang
+
 ### Example Shortcuts
 
 **Greek Letters:**
@@ -86,21 +103,47 @@ cmake --build . --config Release
 | `^2` | ² | `^3` | ³ |
 | `_1` | ₁ | `_n` | ₙ |
 
-See `config/shortcuts.json` for the complete list of 200+ shortcuts across 9 categories.
+**URL Shortcuts (Clickable):**
+| Type | Opens |
+|------|-------|
+| `\rose` | https://aicua.com/rose |
+| `\flowers` | https://aicua.com/flowers |
+| `\github` | https://github.com/aicua/unilang |
+| `\docs` | https://aicua.com/docs |
+
+**💡 Tip:** Search for URL shortcuts in the help window (click tray icon), then double-click to open in browser!
+
+See `config/shortcuts.json` for the complete list of 200+ shortcuts across 10 categories.
 
 ## Configuration
 
 Edit `config/shortcuts.json` to add your own shortcuts:
 
+**Add Symbol Shortcuts:**
 ```json
 {
   "shortcuts": {
     "custom": {
-      "\\myshortcut": "my replacement text"
+      "\\myshortcut": "my replacement text",
+      "\\heart": "❤️"
     }
   }
 }
 ```
+
+**Add URL Shortcuts:**
+```json
+{
+  "shortcuts": {
+    "urls": {
+      "\\mysite": "https://mywebsite.com",
+      "\\docs": "https://docs.mysite.com"
+    }
+  }
+}
+```
+
+When you add URL shortcuts (starting with `http://` or `https://`), they will appear in the search window with a 🔗 icon and can be opened by double-clicking.
 
 ## Contributing
 We welcome contributions from the community! If you'd like to contribute to UniLang, please check out our [Contributing Guidelines](link-to-contributing-guidelines.md) for more information.

@@ -93,7 +93,8 @@ private:
     // Menu item IDs
     static const UINT ID_TRAY_ENABLE = 1001;
     static const UINT ID_TRAY_SETTINGS = 1002;
-    static const UINT ID_TRAY_EXIT = 1003;
+    static const UINT ID_TRAY_UPDATE = 1003;
+    static const UINT ID_TRAY_EXIT = 1004;
 
     static const UINT WM_TRAYICON = WM_USER + 1;
 };

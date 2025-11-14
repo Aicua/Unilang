@@ -309,9 +309,30 @@ std::string HelpWindow::GetDescriptionForShortcut(const std::string& shortcut) c
     return "";
 }
 
+bool HelpWindow::IsURL(const std::string& text) const {
+    return text.find("http://") == 0 || text.find("https://") == 0;
+}
+
+void HelpWindow::OnListBoxClick() {
+    // Get selected item index
+    int selected = (int)SendMessageW(m_listbox, LB_GETCURSEL, 0, 0);
+    if (selected == LB_ERR || selected >= (int)m_item_urls.size()) {
+        return;
+    }
+
+    // Check if this item has a URL
+    const std::string& url = m_item_urls[selected];
+    if (!url.empty()) {
+        // Open URL in browser
+        std::wstring url_w(url.begin(), url.end());
+        ShellExecuteW(nullptr, L"open", url_w.c_str(), nullptr, nullptr, SW_SHOW);
+    }
+}
+
 void HelpWindow::PopulateListBox(const std::string& filter) {
     // Clear existing items
     SendMessageW(m_listbox, LB_RESETCONTENT, 0, 0);
+    m_item_urls.clear();
 
     if (!m_shortcuts_dict) return;
 
@@ -349,11 +370,22 @@ void HelpWindow::PopulateListBox(const std::string& filter) {
             }
         }
 
-        // Format: "symbol  -  shortcut  (description)"
-        // Example: "α  -  \al  (alpha)"
-        std::string display_text = replacement + "  -  " + shortcut;
-        if (!description.empty()) {
-            display_text += "  (" + description + ")";
+        // Format display text based on type
+        std::string display_text;
+        std::string url_for_item;
+
+        if (IsURL(replacement)) {
+            // URL shortcut - format as: "🔗 shortcut  →  URL"
+            display_text = "🔗 " + shortcut + "  →  " + replacement;
+            url_for_item = replacement;
+        } else {
+            // Normal shortcut - format as: "symbol  -  shortcut  (description)"
+            // Example: "α  -  \al  (alpha)"
+            display_text = replacement + "  -  " + shortcut;
+            if (!description.empty()) {
+                display_text += "  (" + description + ")";
+            }
+            url_for_item = "";
         }
 
         // Convert to wide string properly using UTF-8 conversion
@@ -361,6 +393,9 @@ void HelpWindow::PopulateListBox(const std::string& filter) {
 
         // Add to listbox
         SendMessageW(m_listbox, LB_ADDSTRING, 0, (LPARAM)display_text_w.c_str());
+
+        // Store URL (empty string if not a URL)
+        m_item_urls.push_back(url_for_item);
 
         item_count++;
     }
@@ -424,6 +459,10 @@ LRESULT CALLBACK HelpWindow::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
         case WM_COMMAND:
             if (LOWORD(wParam) == ID_SEARCH_EDIT && HIWORD(wParam) == EN_CHANGE) {
                 pThis->OnSearchTextChanged();
+            }
+            else if (LOWORD(wParam) == ID_LISTBOX && HIWORD(wParam) == LBN_DBLCLK) {
+                // Double-click on listbox item
+                pThis->OnListBoxClick();
             }
             break;
 

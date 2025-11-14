@@ -86,12 +86,25 @@ private:
      */
     std::wstring Utf8ToWide(const std::string& utf8) const;
 
+    /**
+     * @brief Check if a replacement string is a URL
+     */
+    bool IsURL(const std::string& text) const;
+
+    /**
+     * @brief Handle listbox item click
+     */
+    void OnListBoxClick();
+
 private:
     HWND m_hwnd = nullptr;
     HWND m_search_edit = nullptr;
     HWND m_listbox = nullptr;
     HINSTANCE m_hinstance = nullptr;
     const ShortcutsDict* m_shortcuts_dict = nullptr;
+
+    // Map listbox index to URL (for clickable URLs)
+    std::vector<std::string> m_item_urls;
 
     // Window dimensions - compact popup style
     static const int WINDOW_WIDTH = 400;

@@ -216,6 +216,13 @@
       "\\quarter": "¼",
       "\\twothirds": "⅔",
       "\\threequarters": "¾"
+    },
+
+    "urls": {
+      "\\rose": "https://aicua.com/rose",
+      "\\flowers": "https://aicua.com/flowers",
+      "\\github": "https://github.com/aicua/unilang",
+      "\\docs": "https://aicua.com/docs"
     }
   },
 

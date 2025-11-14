@@ -148,6 +148,8 @@ void SettingsManager::ShowContextMenu(HWND hwnd, POINT pt) {
 
     AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(hMenu, MF_STRING, ID_TRAY_SETTINGS, L"Settings...");
+    AppendMenuW(hMenu, MF_STRING, ID_TRAY_UPDATE, L"Check for Updates...");
+    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(hMenu, MF_STRING, ID_TRAY_EXIT, L"Exit");
 
     // Set foreground window (required for menu to close properly)

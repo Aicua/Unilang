@@ -11,6 +11,8 @@
 #include "popup_window.h"
 #include "settings_manager.h"
 #include "help_window.h"
+#include "update_manager.h"
+#include "auto_updater.h"
 
 namespace fs = std::filesystem;
 
@@ -293,7 +295,52 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                                    MB_OK | MB_ICONINFORMATION);
                         break;
 
-                    case 1003: // ID_TRAY_EXIT
+                    case 1003: // ID_TRAY_UPDATE
+                    {
+                        // Check for updates
+                        UniLang::UpdateManager update_mgr;
+                        auto version_info = update_mgr.CheckForUpdates("Aicua", "Unilang", "1.0.0");
+
+                        if (!update_mgr.GetLastError().empty()) {
+                            std::wstring error_msg = L"Failed to check for updates:\n\n";
+                            std::string error = update_mgr.GetLastError();
+                            error_msg += std::wstring(error.begin(), error.end());
+                            MessageBoxW(hwnd, error_msg.c_str(), L"Update Check Failed", MB_OK | MB_ICONERROR);
+                            break;
+                        }
+
+                        if (version_info.is_newer) {
+                            // New version available
+                            std::wstring msg = L"New version available: ";
+                            msg += std::wstring(version_info.version.begin(), version_info.version.end());
+                            msg += L"\n\nRelease Notes:\n";
+                            msg += std::wstring(version_info.release_notes.begin(), version_info.release_notes.end());
+                            msg += L"\n\nDo you want to download and install this update?";
+
+                            int result = MessageBoxW(hwnd, msg.c_str(), L"Update Available", MB_YESNO | MB_ICONINFORMATION);
+
+                            if (result == IDYES) {
+                                // Download and install update
+                                UniLang::AutoUpdater updater;
+                                if (!updater.DownloadAndInstall(version_info.download_url, version_info.shortcuts_url)) {
+                                    std::wstring error_msg = L"Failed to download update:\n\n";
+                                    std::string error = updater.GetLastError();
+                                    error_msg += std::wstring(error.begin(), error.end());
+                                    MessageBoxW(hwnd, error_msg.c_str(), L"Update Failed", MB_OK | MB_ICONERROR);
+                                }
+                                // Note: If successful, app will exit and restart automatically
+                            }
+                        } else {
+                            // No updates available
+                            MessageBoxW(hwnd,
+                                       L"You are already running the latest version!",
+                                       L"No Updates Available",
+                                       MB_OK | MB_ICONINFORMATION);
+                        }
+                        break;
+                    }
+
+                    case 1004: // ID_TRAY_EXIT
                         DestroyWindow(hwnd);
                         break;
                 }
