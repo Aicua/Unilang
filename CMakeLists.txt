@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(UniLang VERSION 1.2.1)
+project(UniLang VERSION 1.2.2)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
