@@ -42,7 +42,7 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
     m_hwnd = CreateWindowExW(
         WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
         L"UniLangHelpWindow",
-        L"Search",
+        L"UniLang",
         WS_POPUP | WS_CAPTION | WS_SYSMENU,
         CW_USEDEFAULT, CW_USEDEFAULT,
         WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -400,8 +400,8 @@ void HelpWindow::PopulateListBox(const std::string& filter) {
         item_count++;
     }
 
-    // Keep title simple - just "Search"
-    SetWindowTextW(m_hwnd, L"Search");
+    // Keep title simple - just "UniLang"
+    SetWindowTextW(m_hwnd, L"UniLang");
 }
 
 void HelpWindow::OnSearchTextChanged() {
