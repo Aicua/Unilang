@@ -42,8 +42,8 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
     m_hwnd = CreateWindowExW(
         WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
         L"UniLangHelpWindow",
-        L"Search Shortcuts",
-        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME,
+        L"Search",
+        WS_POPUP | WS_CAPTION | WS_SYSMENU,
         CW_USEDEFAULT, CW_USEDEFAULT,
         WINDOW_WIDTH, WINDOW_HEIGHT,
         nullptr, nullptr, hInstance, this
@@ -70,12 +70,12 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
     // Set placeholder text
     SendMessageW(m_search_edit, EM_SETCUEBANNER, TRUE, (LPARAM)L"Search...");
 
-    // Create ListBox for results
+    // Create ListBox for results (no scroll, dark theme)
     m_listbox = CreateWindowExW(
-        WS_EX_CLIENTEDGE,
+        0,
         L"LISTBOX",
         L"",
-        WS_CHILD | WS_VISIBLE | LBS_NOTIFY | LBS_HASSTRINGS | WS_VSCROLL,
+        WS_CHILD | WS_VISIBLE | LBS_NOTIFY | LBS_HASSTRINGS,
         MARGIN, SEARCH_HEIGHT + 2 * MARGIN,
         WINDOW_WIDTH - 2 * MARGIN, WINDOW_HEIGHT - SEARCH_HEIGHT - 3 * MARGIN,
         m_hwnd,
@@ -102,6 +102,9 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
         L"Segoe UI"                // Font name
     );
     SendMessageW(m_listbox, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+    // Enable dark mode colors (Windows 10 dark theme style)
+    SetClassLongPtrW(m_hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)CreateSolidBrush(RGB(43, 43, 43)));
 
     // Populate with all shortcuts initially
     PopulateListBox();
@@ -321,6 +324,11 @@ void HelpWindow::PopulateListBox(const std::string& filter) {
 
     int item_count = 0;
     for (const auto& [shortcut, replacement] : shortcuts) {
+        // Only show MAX_RESULTS items
+        if (item_count >= MAX_RESULTS) {
+            break;
+        }
+
         // Get description
         std::string description = GetDescriptionForShortcut(shortcut);
 
@@ -357,12 +365,8 @@ void HelpWindow::PopulateListBox(const std::string& filter) {
         item_count++;
     }
 
-    // Update window title with count
-    std::wstring title = L"Search Shortcuts";
-    if (item_count > 0) {
-        title += L" (" + std::to_wstring(item_count) + L")";
-    }
-    SetWindowTextW(m_hwnd, title.c_str());
+    // Keep title simple - just "Search"
+    SetWindowTextW(m_hwnd, L"Search");
 }
 
 void HelpWindow::OnSearchTextChanged() {
