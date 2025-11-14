@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <shellapi.h>
 #include <iostream>
 #include <string>
 #include <filesystem>
@@ -16,6 +17,10 @@
 #include "auto_updater.h"
 
 namespace fs = std::filesystem;
+
+// Timer IDs
+constexpr UINT_PTR TIMER_UPDATE_CHECK = 1;
+constexpr UINT UPDATE_CHECK_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 // Global application state
 struct AppState {
@@ -38,6 +43,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 bool OnKeyEvent(DWORD vkCode, bool isKeyDown);
 std::string GetExecutableDir();
 bool IsVSCodeWindow();
+void CheckForUpdatesAutomatic(HWND hwnd, bool show_notification);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // Check for single instance (prevent multiple instances running)
@@ -140,6 +146,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         return 1;
     }
 
+    // Check for updates automatically on startup (silent, no notification)
+    CheckForUpdatesAutomatic(app.main_window, false);
+
+    // Set timer for periodic update checks (every 7 days)
+    SetTimer(app.main_window, TIMER_UPDATE_CHECK, UPDATE_CHECK_INTERVAL, nullptr);
+
     // UniLang is now running silently in the background
     // Check the system tray icon for status and options
 
@@ -151,6 +163,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
 
     // Cleanup
+    KillTimer(app.main_window, TIMER_UPDATE_CHECK);
     app.keyboard_hook.Uninstall();
     app.settings_manager.RemoveTray();
 
@@ -282,6 +295,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             }
             return 0;
 
+        case WM_TIMER:
+            if (wParam == TIMER_UPDATE_CHECK) {
+                // Periodic update check (every 7 days)
+                CheckForUpdatesAutomatic(hwnd, true);
+            }
+            return 0;
+
         case WM_COMMAND:
             if (g_app) {
                 switch (LOWORD(wParam)) {
@@ -350,6 +370,42 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
         default:
             return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+}
+
+// Automatically check for updates and show balloon notification if available
+void CheckForUpdatesAutomatic(HWND hwnd, bool show_notification) {
+    if (!g_app) return;
+
+    // Check for updates silently
+    UniLang::UpdateManager update_mgr;
+    auto version_info = update_mgr.CheckForUpdates("Aicua", "Unilang", UNILANG_VERSION_STRING);
+
+    // Ignore errors in automatic check (silent failure)
+    if (!update_mgr.GetLastError().empty()) {
+        return;
+    }
+
+    // If new version is available, show balloon notification
+    if (version_info.is_newer && show_notification) {
+        // Prepare notification message
+        std::wstring title = L"UniLang Update Available";
+        std::wstring msg = L"Version ";
+        msg += std::wstring(version_info.version.begin(), version_info.version.end());
+        msg += L" is now available!\n\nRight-click the tray icon and select 'Check for Updates' to install.";
+
+        // Show balloon notification from system tray
+        NOTIFYICONDATAW nid = {};
+        nid.cbSize = sizeof(NOTIFYICONDATAW);
+        nid.hWnd = hwnd;
+        nid.uID = 1;
+        nid.uFlags = NIF_INFO;
+        nid.dwInfoFlags = NIIF_INFO;
+
+        wcsncpy_s(nid.szInfoTitle, title.c_str(), _TRUNCATE);
+        wcsncpy_s(nid.szInfo, msg.c_str(), _TRUNCATE);
+
+        Shell_NotifyIconW(NIM_MODIFY, &nid);
     }
 }
 
