@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
-project(UniLang VERSION 1.0.0)
+project(UniLang VERSION 1.2.0)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Generate version header
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/version.h"
+    @ONLY
+)
 
 # Windows-only for now
 if(NOT WIN32)
@@ -31,6 +38,7 @@ FetchContent_MakeAvailable(json)
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_BINARY_DIR}  # For generated version.h
 )
 
 # Source files
