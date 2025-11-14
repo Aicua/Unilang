@@ -43,6 +43,8 @@ set(UNILANG_SOURCES
     src/popup_window.cpp
     src/settings_manager.cpp
     src/help_window.cpp
+    src/update_manager.cpp
+    src/auto_updater.cpp
 )
 
 # Header files
@@ -54,6 +56,8 @@ set(UNILANG_HEADERS
     src/popup_window.h
     src/settings_manager.h
     src/help_window.h
+    src/update_manager.h
+    src/auto_updater.h
     src/resource.h
 )
 
@@ -70,8 +74,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     nlohmann_json::nlohmann_json
     user32      # For SendInput, SetWindowsHookEx
     gdi32       # For GDI drawing
-    shell32     # For tray icon
+    shell32     # For tray icon and ShellExecute
     comctl32    # For common controls
+    wininet     # For HTTP requests (update checking)
+    urlmon      # For URLDownloadToFile (auto-updater)
+    shlwapi     # For path utilities
 )
 
 # Windows subsystem settings
