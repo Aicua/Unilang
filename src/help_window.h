@@ -108,10 +108,10 @@ private:
 
     // Window dimensions - compact popup style
     static const int WINDOW_WIDTH = 400;
-    static const int WINDOW_HEIGHT = 180;
+    static const int WINDOW_HEIGHT = 300;  // Increased for more results
     static const int SEARCH_HEIGHT = 30;
     static const int MARGIN = 8;
-    static const int MAX_RESULTS = 3;
+    static const int MAX_RESULTS = 10;
 
     // Control IDs
     static const UINT ID_SEARCH_EDIT = 2001;

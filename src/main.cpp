@@ -180,6 +180,12 @@ bool OnKeyEvent(DWORD vkCode, bool isKeyDown) {
         return false;
     }
 
+    // Don't process shortcuts when typing in UniLang search window
+    HWND foreground = GetForegroundWindow();
+    if (foreground && foreground == g_app->help_window.GetHandle()) {
+        return false; // Allow normal typing in search box
+    }
+
     // Handle special keys that should reset the pattern buffer
     // NOTE: VK_SPACE is NOT here because it's used as trigger for LaTeX patterns
     if (vkCode == VK_RETURN || vkCode == VK_ESCAPE || vkCode == VK_TAB) {
