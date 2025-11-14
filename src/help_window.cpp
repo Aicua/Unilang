@@ -38,12 +38,12 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
         }
     }
 
-    // Create window
+    // Create window as compact popup
     m_hwnd = CreateWindowExW(
-        WS_EX_TOPMOST,
+        WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
         L"UniLangHelpWindow",
-        L"UniLang - Shortcuts Reference",
-        WS_OVERLAPPEDWINDOW,
+        L"Search Shortcuts",
+        WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME,
         CW_USEDEFAULT, CW_USEDEFAULT,
         WINDOW_WIDTH, WINDOW_HEIGHT,
         nullptr, nullptr, hInstance, this
@@ -60,7 +60,7 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
         L"",
         WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL,
         MARGIN, MARGIN,
-        WINDOW_WIDTH - 2 * MARGIN - 20, SEARCH_HEIGHT,
+        WINDOW_WIDTH - 2 * MARGIN, SEARCH_HEIGHT,
         m_hwnd,
         (HMENU)ID_SEARCH_EDIT,
         hInstance,
@@ -68,58 +68,54 @@ bool HelpWindow::Create(HINSTANCE hInstance, const ShortcutsDict* shortcuts_dict
     );
 
     // Set placeholder text
-    SendMessageW(m_search_edit, EM_SETCUEBANNER, TRUE, (LPARAM)L"Search shortcuts... (e.g., alpha, sum, arrow)");
+    SendMessageW(m_search_edit, EM_SETCUEBANNER, TRUE, (LPARAM)L"Search...");
 
-    // Create ListView
-    m_listview = CreateWindowExW(
-        0,
-        WC_LISTVIEWW,
+    // Create ListBox for results
+    m_listbox = CreateWindowExW(
+        WS_EX_CLIENTEDGE,
+        L"LISTBOX",
         L"",
-        WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SINGLESEL | WS_BORDER,
+        WS_CHILD | WS_VISIBLE | LBS_NOTIFY | LBS_HASSTRINGS | WS_VSCROLL,
         MARGIN, SEARCH_HEIGHT + 2 * MARGIN,
-        WINDOW_WIDTH - 2 * MARGIN - 20, WINDOW_HEIGHT - SEARCH_HEIGHT - 3 * MARGIN - 40,
+        WINDOW_WIDTH - 2 * MARGIN, WINDOW_HEIGHT - SEARCH_HEIGHT - 3 * MARGIN,
         m_hwnd,
-        (HMENU)ID_LISTVIEW,
+        (HMENU)ID_LISTBOX,
         hInstance,
         nullptr
     );
 
-    // Initialize ListView
-    InitializeListView();
-    PopulateListView();
+    // Set font for better Unicode display
+    HFONT hFont = CreateFontW(
+        18,                        // Height
+        0,                         // Width
+        0,                         // Escapement
+        0,                         // Orientation
+        FW_NORMAL,                 // Weight
+        FALSE,                     // Italic
+        FALSE,                     // Underline
+        FALSE,                     // StrikeOut
+        DEFAULT_CHARSET,           // CharSet
+        OUT_DEFAULT_PRECIS,        // OutPrecision
+        CLIP_DEFAULT_PRECIS,       // ClipPrecision
+        CLEARTYPE_QUALITY,         // Quality
+        DEFAULT_PITCH | FF_DONTCARE, // PitchAndFamily
+        L"Segoe UI"                // Font name
+    );
+    SendMessageW(m_listbox, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+    // Populate with all shortcuts initially
+    PopulateListBox();
 
     return true;
 }
 
-void HelpWindow::InitializeListView() {
-    // Set extended styles
-    ListView_SetExtendedListViewStyle(m_listview,
-        LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_DOUBLEBUFFER);
+std::wstring HelpWindow::Utf8ToWide(const std::string& utf8) const {
+    if (utf8.empty()) return L"";
 
-    // Add columns
-    LVCOLUMNW col = {};
-    col.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
-    col.fmt = LVCFMT_LEFT;
-
-    // Column 1: Category
-    col.cx = 180;
-    col.pszText = (LPWSTR)L"Category";
-    ListView_InsertColumn(m_listview, 0, &col);
-
-    // Column 2: Shortcut
-    col.cx = 200;
-    col.pszText = (LPWSTR)L"Shortcut";
-    ListView_InsertColumn(m_listview, 1, &col);
-
-    // Column 3: Symbol
-    col.cx = 100;
-    col.pszText = (LPWSTR)L"Symbol";
-    ListView_InsertColumn(m_listview, 2, &col);
-
-    // Column 4: Description
-    col.cx = 250;
-    col.pszText = (LPWSTR)L"Description";
-    ListView_InsertColumn(m_listview, 3, &col);
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.size(), nullptr, 0);
+    std::wstring result(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), (int)utf8.size(), &result[0], size_needed);
+    return result;
 }
 
 std::string HelpWindow::GetCategoryForShortcut(const std::string& shortcut) const {
@@ -310,9 +306,9 @@ std::string HelpWindow::GetDescriptionForShortcut(const std::string& shortcut) c
     return "";
 }
 
-void HelpWindow::PopulateListView(const std::string& filter) {
+void HelpWindow::PopulateListBox(const std::string& filter) {
     // Clear existing items
-    ListView_DeleteAllItems(m_listview);
+    SendMessageW(m_listbox, LB_RESETCONTENT, 0, 0);
 
     if (!m_shortcuts_dict) return;
 
@@ -323,7 +319,7 @@ void HelpWindow::PopulateListView(const std::string& filter) {
     std::string filter_lower = filter;
     std::transform(filter_lower.begin(), filter_lower.end(), filter_lower.begin(), ::tolower);
 
-    int item_index = 0;
+    int item_count = 0;
     for (const auto& [shortcut, replacement] : shortcuts) {
         // Get description
         std::string description = GetDescriptionForShortcut(shortcut);
@@ -345,50 +341,27 @@ void HelpWindow::PopulateListView(const std::string& filter) {
             }
         }
 
-        // Get category
-        std::string category = GetCategoryForShortcut(shortcut);
+        // Format: "symbol  -  shortcut  (description)"
+        // Example: "α  -  \al  (alpha)"
+        std::string display_text = replacement + "  -  " + shortcut;
+        if (!description.empty()) {
+            display_text += "  (" + description + ")";
+        }
 
-        // Convert to wide strings
-        std::wstring category_w(category.begin(), category.end());
-        std::wstring shortcut_w(shortcut.begin(), shortcut.end());
-        std::wstring replacement_w(replacement.begin(), replacement.end());
-        std::wstring description_w(description.begin(), description.end());
+        // Convert to wide string properly using UTF-8 conversion
+        std::wstring display_text_w = Utf8ToWide(display_text);
 
-        // Insert item
-        LVITEMW item = {};
-        item.mask = LVIF_TEXT;
-        item.iItem = item_index;
+        // Add to listbox
+        SendMessageW(m_listbox, LB_ADDSTRING, 0, (LPARAM)display_text_w.c_str());
 
-        // Category
-        item.iSubItem = 0;
-        item.pszText = (LPWSTR)category_w.c_str();
-        ListView_InsertItem(m_listview, &item);
-
-        // Shortcut
-        item.iSubItem = 1;
-        item.pszText = (LPWSTR)shortcut_w.c_str();
-        ListView_SetItem(m_listview, &item);
-
-        // Symbol
-        item.iSubItem = 2;
-        item.pszText = (LPWSTR)replacement_w.c_str();
-        ListView_SetItem(m_listview, &item);
-
-        // Description
-        item.iSubItem = 3;
-        item.pszText = (LPWSTR)description_w.c_str();
-        ListView_SetItem(m_listview, &item);
-
-        item_index++;
+        item_count++;
     }
 
-    // Update count in window title
-    std::wstring title = L"UniLang - Shortcuts Reference (" +
-                         std::to_wstring(item_index) + L" shortcuts";
-    if (!filter.empty()) {
-        title += L" - filtered";
+    // Update window title with count
+    std::wstring title = L"Search Shortcuts";
+    if (item_count > 0) {
+        title += L" (" + std::to_wstring(item_count) + L")";
     }
-    title += L")";
     SetWindowTextW(m_hwnd, title.c_str());
 }
 
@@ -402,7 +375,7 @@ void HelpWindow::OnSearchTextChanged() {
     std::string search_text(ws.begin(), ws.end());
 
     // Repopulate with filter
-    PopulateListView(search_text);
+    PopulateListBox(search_text);
 }
 
 void HelpWindow::Show() {
@@ -466,7 +439,7 @@ LRESULT CALLBACK HelpWindow::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
                 width - 2 * MARGIN, SEARCH_HEIGHT,
                 SWP_NOZORDER);
 
-            SetWindowPos(pThis->m_listview, nullptr,
+            SetWindowPos(pThis->m_listbox, nullptr,
                 MARGIN, SEARCH_HEIGHT + 2 * MARGIN,
                 width - 2 * MARGIN,
                 height - SEARCH_HEIGHT - 3 * MARGIN,

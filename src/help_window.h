@@ -62,14 +62,9 @@ private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
     /**
-     * @brief Initialize ListView control
+     * @brief Populate ListBox with shortcuts (filtered or all)
      */
-    void InitializeListView();
-
-    /**
-     * @brief Populate ListView with all shortcuts
-     */
-    void PopulateListView(const std::string& filter = "");
+    void PopulateListBox(const std::string& filter = "");
 
     /**
      * @brief Handle search text change
@@ -86,22 +81,28 @@ private:
      */
     std::string GetDescriptionForShortcut(const std::string& shortcut) const;
 
+    /**
+     * @brief Convert UTF-8 string to wide string
+     */
+    std::wstring Utf8ToWide(const std::string& utf8) const;
+
 private:
     HWND m_hwnd = nullptr;
     HWND m_search_edit = nullptr;
-    HWND m_listview = nullptr;
+    HWND m_listbox = nullptr;
     HINSTANCE m_hinstance = nullptr;
     const ShortcutsDict* m_shortcuts_dict = nullptr;
 
-    // Window dimensions
-    static const int WINDOW_WIDTH = 800;
-    static const int WINDOW_HEIGHT = 600;
+    // Window dimensions - compact popup style
+    static const int WINDOW_WIDTH = 400;
+    static const int WINDOW_HEIGHT = 350;
     static const int SEARCH_HEIGHT = 30;
-    static const int MARGIN = 10;
+    static const int MARGIN = 8;
+    static const int MAX_RESULTS = 10;
 
     // Control IDs
     static const UINT ID_SEARCH_EDIT = 2001;
-    static const UINT ID_LISTVIEW = 2002;
+    static const UINT ID_LISTBOX = 2002;
 };
 
 } // namespace UniLang
