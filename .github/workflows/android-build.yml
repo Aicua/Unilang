@@ -4,10 +4,10 @@ name: Android Build
 on:
   push:
     branches:
-      - 'android/**'
+      - 'claude/android-*'
   pull_request:
     branches:
-      - 'android/**'
+      - 'claude/android-*'
 
 jobs:
   build-android:
