@@ -2,8 +2,11 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
+
+#ifdef _WIN32
 #include <Windows.h>
 #include "resource.h"
+#endif
 
 using json = nlohmann::json;
 
@@ -13,6 +16,7 @@ ShortcutsDict::ShortcutsDict() {
 }
 
 bool ShortcutsDict::LoadFromResource() {
+#ifdef _WIN32
     try {
         // Find the JSON resource
         HRSRC hResource = FindResourceW(nullptr, MAKEINTRESOURCEW(IDR_SHORTCUTS_JSON), L"JSON");
@@ -72,6 +76,12 @@ bool ShortcutsDict::LoadFromResource() {
         // std::cerr << "Error loading shortcuts from resource: " << e.what() << std::endl;
         return false;
     }
+#else
+    // On non-Windows platforms, LoadFromResource is not supported
+    // Use LoadFromFile instead
+    std::cerr << "LoadFromResource() is only available on Windows. Use LoadFromFile() instead." << std::endl;
+    return false;
+#endif
 }
 
 bool ShortcutsDict::LoadFromFile(const std::string& filepath) {
