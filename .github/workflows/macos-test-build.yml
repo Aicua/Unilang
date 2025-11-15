@@ -1,0 +1,51 @@
+name: macOS Test Build
+
+# Only trigger on the macOS test branch
+on:
+  push:
+    branches:
+      - 'claude/macos-build-test-*'
+  pull_request:
+    branches:
+      - 'claude/macos-build-test-*'
+
+jobs:
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install CMake
+        run: brew install cmake
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --config Release
+
+      - name: Check executable
+        run: |
+          ls -lh build/bin/
+          file build/bin/UniLang
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UniLang-macOS
+          path: build/bin/UniLang
+          retention-days: 7
+
+      - name: Show build info
+        run: |
+          echo "✅ macOS build completed successfully!"
+          echo "Executable size:"
+          du -h build/bin/UniLang
