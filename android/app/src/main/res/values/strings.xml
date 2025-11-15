@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UniLang</string>
+    <string name="ime_name">UniLang Keyboard</string>
+    <string name="ime_description">LaTeX-style Math &amp; Symbol Shortcuts</string>
+
+    <!-- Settings -->
+    <string name="settings_title">UniLang Settings</string>
+    <string name="about_title">About UniLang</string>
+    <string name="about_description">Universal Language &amp; Text Replacement Tool\n\nLaTeX-style shortcuts for typing mathematical symbols, Greek letters, and special characters.\n\nVersion 1.0.0</string>
+
+    <!-- Instructions -->
+    <string name="setup_instructions">To use UniLang:\n\n1. Enable UniLang Keyboard in Settings\n2. Switch to UniLang Keyboard\n3. Type shortcuts like \\alpha, \\sum, \\pi\n4. Enjoy!</string>
+</resources>
