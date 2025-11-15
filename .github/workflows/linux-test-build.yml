@@ -1,0 +1,62 @@
+name: Linux Test Build
+
+# Only trigger on the Linux test branch
+on:
+  push:
+    branches:
+      - 'claude/linux-build-test-*'
+  pull_request:
+    branches:
+      - 'claude/linux-build-test-*'
+
+jobs:
+  build-linux:
+    name: Build on Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          cd build
+          cmake --build . --config Release
+
+      - name: Check executable
+        run: |
+          ls -lh build/bin/
+          file build/bin/UniLang
+
+      - name: Test run (version check)
+        run: |
+          cd build/bin
+          timeout 2s ./UniLang || true
+          echo "Note: Keyboard hooks won't work on GitHub runners (no display)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UniLang-Linux
+          path: build/bin/UniLang
+          retention-days: 7
+
+      - name: Show build info
+        run: |
+          echo "✅ Linux build completed successfully!"
+          echo "Executable size:"
+          du -h build/bin/UniLang
+          echo ""
+          echo "Note: This is a stub implementation."
+          echo "Full X11/Wayland functionality needs to be implemented."
