@@ -48,20 +48,27 @@ jobs:
           ls -lh android/app/build/outputs/apk/debug/
           du -h android/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/debug/app-debug.apk \
+             android/app/build/outputs/apk/debug/UniLang.apk
+          echo "✅ Renamed to UniLang.apk"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: UniLang-Android
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/UniLang.apk
           retention-days: 7
 
       - name: Show build info
         run: |
           echo "✅ Android APK build completed successfully!"
+          echo "APK name: UniLang.apk"
           echo "APK size:"
-          du -h android/app/build/outputs/apk/debug/app-debug.apk
+          du -h android/app/build/outputs/apk/debug/UniLang.apk
           echo ""
           echo "To install on device:"
-          echo "adb install app-debug.apk"
+          echo "adb install UniLang.apk"
           echo ""
           echo "Then enable in Settings > System > Languages & Input > Virtual keyboard"
