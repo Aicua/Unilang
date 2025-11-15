@@ -95,8 +95,22 @@ elseif(UNIX AND NOT APPLE)
         src/platform/linux/text_input_linux.h
     )
 elseif(APPLE)
-    # macOS - TODO: Add macOS implementations
-    message(WARNING "macOS support is not yet implemented")
+    # macOS
+    # Enable Objective-C++
+    enable_language(OBJCXX)
+    set(CMAKE_OBJCXX_STANDARD 17)
+    set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
+
+    list(APPEND UNILANG_SOURCES
+        src/platform/macos/main_macos.mm
+        src/platform/macos/keyboard_hook_macos.mm
+        src/platform/macos/text_input_macos.mm
+        src/platform/macos/platform_factory_macos.mm
+    )
+    list(APPEND UNILANG_HEADERS
+        src/platform/macos/keyboard_hook_macos.h
+        src/platform/macos/text_input_macos.h
+    )
 endif()
 
 # Create executable
@@ -127,8 +141,23 @@ elseif(UNIX AND NOT APPLE)
     # TODO: Add X11, XTest, or other Linux libraries as needed
     # target_link_libraries(${PROJECT_NAME} PRIVATE X11 Xtst)
 elseif(APPLE)
-    # macOS-specific libraries
-    # TODO: Add Cocoa frameworks as needed
+    # macOS-specific frameworks
+    find_library(COCOA_FRAMEWORK Cocoa REQUIRED)
+    find_library(CARBON_FRAMEWORK Carbon REQUIRED)
+    find_library(COREGRAPHICS_FRAMEWORK CoreGraphics REQUIRED)
+    find_library(COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${COCOA_FRAMEWORK}
+        ${CARBON_FRAMEWORK}
+        ${COREGRAPHICS_FRAMEWORK}
+        ${COREFOUNDATION_FRAMEWORK}
+    )
+
+    # Set bundle properties for macOS app
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MACOSX_BUNDLE FALSE  # Not a bundle app, just a regular executable
+    )
 endif()
 
 # Windows subsystem settings
