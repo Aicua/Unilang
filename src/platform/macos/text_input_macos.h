@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../platform_interface.h"
+#include <CoreGraphics/CoreGraphics.h>
 
 namespace UniLang {
 namespace Platform {
