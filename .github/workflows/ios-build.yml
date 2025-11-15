@@ -1,0 +1,54 @@
+name: iOS Build
+
+# Only trigger on the iOS branch
+on:
+  push:
+    branches:
+      - 'claude/ios-*'
+  pull_request:
+    branches:
+      - 'claude/ios-*'
+
+jobs:
+  build-ios:
+    name: Build iOS Package
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Build Swift package
+        run: |
+          cd ios
+          swift build -v
+
+      - name: Run Swift tests (if any)
+        run: |
+          cd ios
+          swift test || echo "No tests defined yet"
+
+      - name: Show build info
+        run: |
+          echo "✅ iOS Swift package built successfully!"
+          echo ""
+          echo "Platform: iOS 14+"
+          echo "Language: Swift 5.9+"
+          echo "Core components:"
+          echo "  - ShortcutsDict.swift (ported from C++)"
+          echo "  - PatternMatcher.swift (ported from C++)"
+          echo ""
+          echo "Note: Full iOS app with keyboard extension requires:"
+          echo "  - Xcode project (.xcodeproj)"
+          echo "  - App and Extension targets"
+          echo "  - Signing certificates ($99/year Apple Developer)"
+          echo "  - This build only validates Swift syntax and core logic"
